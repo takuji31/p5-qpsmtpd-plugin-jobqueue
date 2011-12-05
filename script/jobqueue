@@ -1,0 +1,13 @@
+#!/usr/bin/env perl
+
+use Qpsmtpd::Plugin::JobQueue;
+
+sub register {
+    my ($self, $qp, @args) = @_;
+    #TODO read config?
+}
+
+sub hook_queue {
+    my ($self, $qp) = @_;
+    #TODO call queue method
+}
