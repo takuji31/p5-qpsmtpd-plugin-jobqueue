@@ -33,7 +33,8 @@ sub parse_config {
     )->with(qw/Method/);
     my ($class, $args) = $validator->validate(@_);
     #TODO parse config
-    return {};
+    my $conf_string = join "\n", @{$args->{conf}};
+    return eval $conf_string;
 }
 
 sub get_engine {

@@ -4,14 +4,16 @@ use warnings;
 use 5.10.0;
 use parent qw/Qpsmtpd::Plugin::JobQueue::Engine/;
 
-use Qpsmtpd::Constants;
+use Qudo;
+use Data::GUID;
 
 sub enqueue {
     my ($self, $data) = @_;
-    use Data::Dumper;
-    #TODO enqueue
-    $self->qp->log(LOGDEBUG, Dumper $data);
 
+    my $q = Qudo->new(
+        %{$self->conf->{qudo}},
+    );
+    $q->enqueue('Hoge', {arg => $data});
 }
 
 1;

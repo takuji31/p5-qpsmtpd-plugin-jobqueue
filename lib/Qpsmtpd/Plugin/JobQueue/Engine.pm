@@ -20,9 +20,9 @@ sub parse_and_enqueue {
     my ($self, $args) = $validator->validate(@_);
     my $t = $args->{transaction};
     my %data = (
-        to     => [$t->recipients],
-        from   => $t->sender,
-        header => $t->header,
+        to     => [map {$_->address} $t->recipients],
+        from   => $t->sender->address,
+        header => $t->header->header_hashref,
         body   => $t->body_as_string,
     );
 
