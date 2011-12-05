@@ -6,14 +6,29 @@ use 5.10.0;
 use Carp ();
 use Data::Validator;
 
-sub queue { Carp::croak("Please implement queue method") }
+use Class::Accessor::Lite (
+    new => 1,
+    ro  => [qw/qp conf/],
+);
 
-sub get_engine {
+sub enqueue { Carp::croak("Please implement queue method") }
+
+sub parse_and_enqueue {
     state $validator = Data::Validator->new(
-        config => {isa => 'HashRef'},
+        transaction => {isa => 'Qpsmtpd::Transaction'},
     )->with(qw/Method/);
-    my ($class, $args) = $validator->validate(@_);
-    
+    my ($self, $args) = $validator->validate(@_);
+    my $t = $args->{transaction};
+    my %data = (
+        to     => [$t->recipients],
+        from   => $t->sender,
+        header => $t->header,
+        body   => $t->body_as_string,
+    );
+
+    my @result = $self->enqueue(\%data);
+
+    return @result;
 }
 
 

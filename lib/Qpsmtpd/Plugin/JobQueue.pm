@@ -1,6 +1,8 @@
 package Qpsmtpd::Plugin::JobQueue;
 use strict;
 use warnings;
+use 5.10.0;
+
 our $VERSION = '0.01';
 
 use parent qw/Qpsmtpd::Plugin/;
@@ -11,6 +13,7 @@ use Class::Accessor::Lite (
 );
 
 
+use Class::Load ();
 use Data::Validator;
 
 use Qpsmtpd::Constants;
@@ -21,6 +24,7 @@ sub register {
     #TODO read config?
     my @conf = $self->qp->config('jobqueue');
     $self->conf($self->parse_config(conf => \@conf));
+    $self->engine($args[0] || $self->conf->{engine});
 }
 
 sub parse_config {
@@ -32,10 +36,30 @@ sub parse_config {
     return {};
 }
 
+sub get_engine {
+    state $validator = Data::Validator->new(
+        engine => {isa => 'Str'},
+    )->with(qw/Method/);
+    my ($self, $args) = $validator->validate(@_);
+    my $pkg = $args->{engine};
+    if($pkg =~ /^\+/) {
+        $pkg =~ s/^\+//;
+    } else {
+        $pkg = "Qpsmtpd::Plugin::JobQueue::Engine::$pkg";
+    }
+
+    Class::Load::load_class($pkg);
+    my $engine = $pkg->new(conf => $self->conf, qp => $self);
+    return $engine;
+}
+
 sub hook_queue {
     my ($self, $transaction) = @_;
     #TODO call queue method
 
+    my $engine = $self->get_engine(engine => $self->engine);
+    
+    $engine->parse_and_enqueue(transaction => $transaction);
     return DECLINED;
 }
 
