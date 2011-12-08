@@ -23,8 +23,12 @@ sub parse_and_enqueue {
         to     => [map {$_->address} $t->recipients],
         from   => $t->sender->address,
         header => $t->header->header_hashref,
-        body   => $t->body_as_string,
     );
+    $t->body_spool;
+    $t->body_resetpos;
+    my $fh = $t->body_fh;
+    my $raw = do{local $/; <$fh>;};
+    $data{raw_data} = $t->header->as_string.$raw;
 
     my @result = $self->enqueue(\%data);
 
