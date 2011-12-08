@@ -34,7 +34,9 @@ sub parse_config {
     my ($class, $args) = $validator->validate(@_);
     #TODO parse config
     my $conf_string = join "\n", @{$args->{conf}};
-    return eval $conf_string;
+    my $conf = eval $conf_string;
+    die "Parse config failure! cause: $@" if $@;
+    return $conf;
 }
 
 sub get_engine {
