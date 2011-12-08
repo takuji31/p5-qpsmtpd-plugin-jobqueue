@@ -13,7 +13,7 @@ sub enqueue {
     my $q = Qudo->new(
         %{$self->conf->{qudo}},
     );
-    $q->enqueue('Hoge', {arg => $data});
+    $q->enqueue($self->conf->{worker_class}, {arg => $data});
 }
 
 1;
